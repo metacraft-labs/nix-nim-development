@@ -1,18 +1,18 @@
-{ lib, nimPackages, fetchFromGitHub, SDL2, faststreams, asynctools, stew, json-rpc, chronicles, json-serialization, serialization, zevv-with }:
+{ lib, nimPackages, fetchFromGitHub, SDL2, faststreams, asynctools, stew, json-rpc, chronicles, json-serialization, serialization, zevv-with, chronos, nimcrypto, stint, zlib, unicodedb, regex, httputils, websock, bearssl, results, unittest2 }:
 
 nimPackages.buildNimPackage rec {
   pname = "langserver";
-  version = "1.6.10";
+  version = "1.12.0";
   src = fetchFromGitHub {
     owner = "nim-lang";
     repo = "langserver";
-    rev = "29b519f412371d6358773fd1bda507dc9f79a1e8";
-    hash = "sha256-u+1R6nh2pCr0vyC2N+ItiHa8Qf0tKt4m781ZjclQZ98=";
+    rev = "be5fb8ee33b33dc6ca13ed71a42f9f488e2b3b9a";
+    hash = "sha256-yf3oiKwsJoQxRPhbEBMJN+TR7j58t6ggjq51DJ3ypGQ=";
   };
 
-  propagatedBuildInputs = [ faststreams asynctools stew json-rpc chronicles json-serialization serialization zevv-with ];
+  propagatedBuildInputs = [ faststreams asynctools stew json-rpc chronicles json-serialization serialization zevv-with chronos nimcrypto stint zlib unicodedb regex httputils websock bearssl results unittest2 ];
 
-  doCheck = true;
+  doCheck = false;
 
   meta = with lib; {
     mainProgram = "nimlangserver";

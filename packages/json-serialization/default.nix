@@ -3,6 +3,6 @@
 fetchFromGitHub {
   owner = "status-im";
   repo = "nim-json-serialization";
-  rev = "a7d815ed92f200f490c95d3cfd722089cc923ce6";
-  hash = "sha256-lgrAE1fW0TRB5S9fSNuVPOcP9ORhovCJnJHHrS+mXiE=";
+  rev = "6eadb6e939ffa7882ff5437033c11a9464d3385c";
+  hash = "sha256-Ci1l91tLaYgnoipIc74pNdiQSkmzz98L9ulDwsuehQM=";
 }

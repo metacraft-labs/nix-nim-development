@@ -3,6 +3,6 @@
 fetchFromGitHub {
   owner = "status-im";
   repo = "nim-stew";
-  rev = "e18f5a62af2ade7a1fd1d39635d4e04d944def08";
-  hash = "sha256-MwXvXxBrtGOfgTUPniXNT23meWtCPTSnENE+YRkrZNA=";
+  rev = "79e4fa5a9d3374db17ed63622714d3e1094c7f34";
+  hash = "sha256-GWB/7XzOv59lDPeyvG5joOIkkwmmHQOmKp1/1u3TInU=";
 }

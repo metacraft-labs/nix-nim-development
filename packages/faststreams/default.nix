@@ -3,6 +3,6 @@
 fetchFromGitHub {
   owner = "status-im";
   repo = "nim-faststreams";
-  rev = "814f8927e1f356f39219f37f069b83066bcc893a";
-  hash = "sha256-qVwGLXlhJXhdyXpFpujFrLf0tVQIbOzfqg1ZAM+U2B4=";
+  rev = "2b08c774afaafd600cf4c6f994cf78b8aa090c0c";
+  hash = "sha256-+gafotMYZSisQgdJ9dVoiLmmvgd+oR0CklI3eItK9IM=";
 }
