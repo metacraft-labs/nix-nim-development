@@ -2,39 +2,62 @@
   description = "langserver";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = github:numtide/flake-utils;
+    nixos-modules.url = "github:metacraft-labs/nixos-modules";
+
+    nixpkgs.follows = "nixos-modules/nixpkgs";
+    flake-parts.follows = "nixos-modules/flake-parts";
+
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
     };
   };
 
-  outputs = {
+  outputs = inputs @ {
     self,
     nixpkgs,
-    flake-utils,
+    nixos-modules,
+    flake-parts,
     rust-overlay,
+    ...
   }:
-    {
-      overlays.default =
-        nixpkgs.lib.fixedPoints.composeExtensions
-        rust-overlay.overlays.default
-        (import ./overlay.nix);
-    }
-    // (
-      flake-utils.lib.eachDefaultSystem
-      (system: let
-        pkgs = import nixpkgs {
+    flake-parts.lib.mkFlake {inherit inputs;} {
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
+      imports = [
+        nixos-modules.modules.flake.git-hooks
+      ];
+
+      flake = {
+        mcl.shard-matrix.systemsToBuild = [
+          "x86_64-linux"
+          "aarch64-darwin"
+        ];
+
+        overlays.default =
+          nixpkgs.lib.fixedPoints.composeExtensions
+          rust-overlay.overlays.default
+          (import ./overlay.nix);
+      };
+
+      perSystem = {
+        pkgs,
+        system,
+        ...
+      }: let
+        overlayedPkgs = import nixpkgs {
           inherit system;
           overlays = [
             self.overlays.default
           ];
         };
       in {
-        packages = pkgs.metacraft-labs;
-        devShells.default = import ./shell.nix {inherit pkgs;};
-      })
-    );
+        packages = overlayedPkgs.metacraft-labs;
+        devShells.default = import ./shell.nix {pkgs = overlayedPkgs;};
+      };
+    };
 }
