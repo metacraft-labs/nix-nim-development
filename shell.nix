@@ -1,13 +1,12 @@
-{pkgs}:
+{ pkgs }:
 with pkgs;
-  mkShell {
-    packages =
-      [
-        figlet
-        metacraft-labs.langserver
-      ];
+mkShell {
+  packages = [
+    figlet
+    metacraft-labs.langserver
+  ];
 
-    shellHook = ''
-      figlet -w$COLUMNS "langserver"
-    '';
-  }
+  shellHook = ''
+    figlet -w$COLUMNS "langserver"
+  '';
+}

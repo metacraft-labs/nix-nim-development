@@ -1,4 +1,10 @@
-{ fetchFromGitHub, fetchgit, lib, stdenv, runCommand }:
+{
+  fetchFromGitHub,
+  fetchgit,
+  lib,
+  stdenv,
+  runCommand,
+}:
 
 let
   src = fetchgit {
@@ -7,4 +13,5 @@ let
     hash = "sha256-mlSUqAbDEk72AjZX4Wbhh/oJ64wxUfc/he2fe15ylSg=";
     fetchSubmodules = true;
   };
-in src
+in
+src

@@ -1,4 +1,28 @@
-{ lib, nimPackages, fetchFromGitHub, SDL2, faststreams, asynctools, stew, json-rpc, chronicles, json-serialization, serialization, zevv-with, chronos, nimcrypto, stint, zlib, unicodedb, regex, httputils, websock, bearssl, results, unittest2 }:
+{
+  lib,
+  nimPackages,
+  fetchFromGitHub,
+  SDL2,
+  faststreams,
+  asynctools,
+  stew,
+  json-rpc,
+  chronicles,
+  json-serialization,
+  serialization,
+  zevv-with,
+  chronos,
+  nimcrypto,
+  stint,
+  zlib,
+  unicodedb,
+  regex,
+  httputils,
+  websock,
+  bearssl,
+  results,
+  unittest2,
+}:
 
 nimPackages.buildNimPackage rec {
   pname = "langserver";
@@ -10,7 +34,27 @@ nimPackages.buildNimPackage rec {
     hash = "sha256-yf3oiKwsJoQxRPhbEBMJN+TR7j58t6ggjq51DJ3ypGQ=";
   };
 
-  propagatedBuildInputs = [ faststreams asynctools stew json-rpc chronicles json-serialization serialization zevv-with chronos nimcrypto stint zlib unicodedb regex httputils websock bearssl results unittest2 ];
+  propagatedBuildInputs = [
+    faststreams
+    asynctools
+    stew
+    json-rpc
+    chronicles
+    json-serialization
+    serialization
+    zevv-with
+    chronos
+    nimcrypto
+    stint
+    zlib
+    unicodedb
+    regex
+    httputils
+    websock
+    bearssl
+    results
+    unittest2
+  ];
 
   doCheck = false;
 

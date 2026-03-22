@@ -13,15 +13,16 @@
     };
   };
 
-  outputs = inputs @ {
-    self,
-    nixpkgs,
-    nixos-modules,
-    flake-parts,
-    rust-overlay,
-    ...
-  }:
-    flake-parts.lib.mkFlake {inherit inputs;} {
+  outputs =
+    inputs@{
+      self,
+      nixpkgs,
+      nixos-modules,
+      flake-parts,
+      rust-overlay,
+      ...
+    }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "x86_64-linux"
         "aarch64-linux"
@@ -38,26 +39,28 @@
           "aarch64-darwin"
         ];
 
-        overlays.default =
-          nixpkgs.lib.fixedPoints.composeExtensions
-          rust-overlay.overlays.default
-          (import ./overlay.nix);
+        overlays.default = nixpkgs.lib.fixedPoints.composeExtensions rust-overlay.overlays.default (
+          import ./overlay.nix
+        );
       };
 
-      perSystem = {
-        pkgs,
-        system,
-        ...
-      }: let
-        overlayedPkgs = import nixpkgs {
-          inherit system;
-          overlays = [
-            self.overlays.default
-          ];
+      perSystem =
+        {
+          pkgs,
+          system,
+          ...
+        }:
+        let
+          overlayedPkgs = import nixpkgs {
+            inherit system;
+            overlays = [
+              self.overlays.default
+            ];
+          };
+        in
+        {
+          packages = overlayedPkgs.metacraft-labs;
+          devShells.default = import ./shell.nix { pkgs = overlayedPkgs; };
         };
-      in {
-        packages = overlayedPkgs.metacraft-labs;
-        devShells.default = import ./shell.nix {pkgs = overlayedPkgs;};
-      };
     };
 }
