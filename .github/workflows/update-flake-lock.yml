@@ -1,0 +1,23 @@
+name: Flake Lock Update
+
+on:
+  # Enable option to run on nixos-module push to main branch
+  repository_dispatch:
+    types:
+      - flake-update
+
+  # Enable option to manually run the action:
+  workflow_dispatch:
+
+jobs:
+  update-flake-lock:
+    uses: metacraft-labs/nixos-modules/.github/workflows/reusable-update-flake-lock.yml@main
+    secrets:
+      CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
+      CREATE_PR_APP_ID: ${{ secrets.NIX_FLAKE_UPDATE_PR_BOT_APP_ID }}
+      CREATE_PR_APP_PRIVATE_KEY: ${{ secrets.NIX_FLAKE_UPDATE_PR_BOT_APP_PRIVATE_KEY }}
+      NIX_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GIT_GPG_SIGNING_SECRET_KEY: ${{ secrets.GIT_GPG_SIGNING_SECRET_KEY }}
+    with:
+      runner: '["self-hosted", "Linux", "x86-64-v2"]'
+      sign-commits: true
