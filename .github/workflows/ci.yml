@@ -5,10 +5,12 @@ on:
   merge_group:
   push:
     branches:
-      - main
+      - dev
+      - stable
   pull_request:
     branches:
-      - main
+      - dev
+      - stable
 
 jobs:
   lint:
