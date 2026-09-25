@@ -7,6 +7,6 @@ mkShell {
   ];
 
   shellHook = ''
-    figlet -w$COLUMNS "langserver"
+    figlet -w"''${COLUMNS:-80}" "langserver"
   '';
 }
