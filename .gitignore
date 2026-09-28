@@ -2,3 +2,18 @@
 
 # Repro development environment cache
 .repro/
+
+# The pre-commit config is GENERATED and must not be tracked -- it is a symlink
+# to an absolute /nix/store path valid only on the machine that generated it.
+# git-hooks.nix writes it from the devShell shellHook on every entry.
+#
+# It WAS tracked here (git mode 120000), which is how a dangling symlink came to
+# be checked in: `pre-commit` answers "InvalidConfigError:
+# .pre-commit-config.yaml is not a file" for it off its build host, and on
+# Windows it is a text file naming a path that does not exist.
+#
+# REMOVE THIS LINE if this repo ever adopts the portable committed form from
+# repo-requirements.md section 4.1 -- a real committed config must be tracked,
+# and an ignore line left behind is what made that form impossible in a sibling
+# repo.
+.pre-commit-config.yaml
