@@ -48,6 +48,7 @@
         {
           pkgs,
           system,
+          config,
           ...
         }:
         let
@@ -60,6 +61,9 @@
         in
         {
           packages = overlayedPkgs.metacraft-labs;
+          # CI evaluates checks; retain every actual exported package derivation.
+          checks = config.packages;
+
           devShells.default = import ./shell.nix { pkgs = overlayedPkgs; };
         };
     };
