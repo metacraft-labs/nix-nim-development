@@ -31,7 +31,7 @@ def evaluate(remove_checks=False):
                   + '{ packages = identity (f.packages.${system} or {}); '
                   + 'checks = identity (f.checks.${system} or {}); }; }) systems)')
     result = subprocess.run(["nix", "--extra-experimental-features", "nix-command flakes",
-                             "eval", "--impure", "--json", "--expr", expression],
+                            "eval", "--impure", "--json", "--expr", expression],
                             capture_output=True, text=True)
     if result.returncode:
         raise RuntimeError(result.stderr)
