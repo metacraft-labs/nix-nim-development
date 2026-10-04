@@ -10,7 +10,11 @@
 # It WAS tracked here (git mode 120000), which is how a dangling symlink came to
 # be checked in: `pre-commit` answers "InvalidConfigError:
 # .pre-commit-config.yaml is not a file" for it off its build host, and on
-# Windows it is a text file naming a path that does not exist.
+# Windows it is a text file naming a path that does not exist. `prek` fails
+# differently and even more loudly: once the shellHook regenerates the symlink
+# to a new store path, the tracked blob and the working-tree one disagree and it
+# refuses outright -- "error: prek configuration file is not staged" -- so every
+# commit failed for a reason unrelated to its content.
 #
 # REMOVE THIS LINE if this repo ever adopts the portable committed form from
 # repo-requirements.md section 4.1 -- a real committed config must be tracked,
