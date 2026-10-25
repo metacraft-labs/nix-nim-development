@@ -1,17 +1,20 @@
 _finalNixpkgs: prevNixpkgs:
 let
-  nim2OrDefault = if prevNixpkgs ? nim2 then prevNixpkgs.nim2 else prevNixpkgs.nim;
+  # Rebuild the stock compiler from patched Nim sources, then wrap that binary.
+  nimUnwrapped = prevNixpkgs.callPackage ./packages/nim/default.nix { };
+  nim2OrDefault = prevNixpkgs.nim2.override { nim-unwrapped-2_2 = nimUnwrapped; };
   nimPkgs2 =
-    if prevNixpkgs ? nimPackages then
-      prevNixpkgs.nimPackages.override { nim = nim2OrDefault; }
-    else if prevNixpkgs ? nim2Packages then
-      prevNixpkgs.nim2Packages
-    else
-      {
-        buildNimPackage = prevNixpkgs.buildNimPackage;
-        nim = nim2OrDefault;
-        nimble = prevNixpkgs.nimble or null;
+    # Only the locked builder API is supported: alternative package sets must
+    # not silently rebuild langserver with their original compiler.
+    assert !(prevNixpkgs ? nimPackages || prevNixpkgs ? nim2Packages);
+    {
+      buildNimPackage = prevNixpkgs.buildNimPackage.override {
+        nim2 = nim2OrDefault;
+        nim_builder = prevNixpkgs.nim_builder.override { nim = nim2OrDefault; };
       };
+      nim = nim2OrDefault;
+      nimble = prevNixpkgs.nimble or null;
+    };
   faststreams = prevNixpkgs.callPackage ./packages/faststreams/default.nix { };
   asynctools = prevNixpkgs.callPackage ./packages/asynctools/default.nix { };
   stew = prevNixpkgs.callPackage ./packages/stew/default.nix { };
@@ -60,6 +63,8 @@ in
 {
   metacraft-labs = rec {
     inherit langserver;
+    nim = nim2OrDefault;
+    nim-unwrapped = nimUnwrapped;
     inherit faststreams;
     inherit asynctools;
     inherit stew;

@@ -1,0 +1,27 @@
+From: 5267deca91eb58a7aac3ebcae056688e292b180b
+Subject: Prepare concrete referent hooks when reusing canonical references
+
+Compiler-only backport from metacraft-labs/nim commit
+5267deca91eb58a7aac3ebcae056688e292b180b.
+For stock Nim 2.2.4, omit gcYrc (not declared there), matching its existing
+atomicRefOp selection. Context uses 2.2.4's isTrival spelling; added code
+is otherwise identical. No tracing-fork code or lock refresh is included.
+
+diff --git a/compiler/liftdestructors.nim b/compiler/liftdestructors.nim
+index 15c60363f..270f3f36b 100644
+--- a/compiler/liftdestructors.nim
++++ b/compiler/liftdestructors.nim
+@@ -1469,6 +1469,13 @@ proc createTypeBoundOps(g: ModuleGraph; c: PContext; orig: PType; info: TLineInf
+     if canon != orig:
+       setAttachedOp(g, idgen.module, orig, k, getAttachedOp(g, canon, k))
+ 
++  if skipped.kind == tyRef and canon != skipped and
++      g.config.selectedGC in {gcArc, gcOrc, gcAtomicArc}:
++    # Reusing reference hooks skips atomicRefOp, which normally prepares the
++    # referent's hooks. RTTI still looks them up on this concrete referent,
++    # even when the reference hook bodies and backend layout are shared.
++    createTypeBoundOps(g, c, skipped.elementType, info, idgen)
++
+   if not isTrival(getAttachedOp(g, orig, attachedDestructor)):
+     #or not isTrival(orig.assignment) or
+     # not isTrival(orig.sink):

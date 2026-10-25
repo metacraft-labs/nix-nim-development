@@ -15,24 +15,33 @@ def validate(data):
     for system in SYSTEMS:
         packages = data[system]["packages"]
         checks = data[system]["checks"]
-        if not packages or not checks or packages != checks:
+        if (not packages or not checks
+                or any(checks.get(name) != drv for name, drv in packages.items())
+                or set(checks) != set(packages) | {"nim-ownership"}):
             raise ValueError("Missing or different complete CI derivations for " + system)
-        if any(not value.endswith(".drv") for value in packages.values()):
+        if any(not value.endswith(".drv") for value in checks.values()):
             raise ValueError("Catalog contains a non-derivation identity")
 
 
 def evaluate(remove_checks=False):
     flake = "git+file://" + str(ROOT)
-    expression = ('let original = builtins.getFlake ' + json.dumps(flake) + '; '
-                  + 'f = ' + ('builtins.removeAttrs original ["checks"]' if remove_checks else 'original')
-                  + '; systems = ["x86_64-linux" "aarch64-darwin"]; '
-                  + 'identity = set: builtins.mapAttrs (name: value: value.drvPath) set; '
-                  + 'in builtins.listToAttrs (map (system: { name = system; value = '
-                  + '{ packages = identity (f.packages.${system} or {}); '
-                  + 'checks = identity (f.checks.${system} or {}); }; }) systems)')
-    result = subprocess.run(["nix", "--extra-experimental-features", "nix-command flakes",
-                            "eval", "--impure", "--json", "--expr", expression],
-                            capture_output=True, text=True)
+    selected = 'builtins.removeAttrs original ["checks"]' if remove_checks else 'original'
+    expression = (
+        'let original = builtins.getFlake ' + json.dumps(flake) + '; '
+        + 'f = ' + selected
+        + '; systems = ["x86_64-linux" "aarch64-darwin"]; '
+        + 'identity = set: builtins.mapAttrs (name: value: value.drvPath) set; '
+        + 'in builtins.listToAttrs (map (system: { name = system; value = '
+        + '{ packages = identity (f.packages.${system} or {}); '
+        + 'checks = identity (f.checks.${system} or {}); }; }) systems)'
+    )
+    result = subprocess.run(
+        [
+            "nix", "--extra-experimental-features", "nix-command flakes",
+            "eval", "--impure", "--json", "--expr", expression,
+        ],
+        capture_output=True, text=True,
+    )
     if result.returncode:
         raise RuntimeError(result.stderr)
     return json.loads(result.stdout)

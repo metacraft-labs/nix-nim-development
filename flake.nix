@@ -62,7 +62,12 @@
         {
           packages = overlayedPkgs.metacraft-labs;
           # CI evaluates checks; retain every actual exported package derivation.
-          checks = config.packages;
+          checks = config.packages // {
+            nim-ownership = overlayedPkgs.callPackage ./packages/nim/check.nix {
+              inherit (overlayedPkgs.metacraft-labs) nim nim-unwrapped;
+              baseline = pkgs.nim2;
+            };
+          };
 
           devShells.default = import ./shell.nix { pkgs = overlayedPkgs; };
         };
