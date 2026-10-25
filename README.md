@@ -51,10 +51,32 @@ checks to establish the capability: the version string remains 2.2.4 and cannot
 identify either correction. The check driver is `tests/check_ownership.sh`;
 it requires explicit absolute compiler paths and an output directory.
 
+## Supported symbol ownership inspection
+
+The package also backports `std/macros.getOwner` from
+[05c9a809bed098833590573c113bce8656e1785d](https://github.com/metacraft-labs/nim/commit/05c9a809bed098833590573c113bce8656e1785d).
+It exposes the existing `SymOwner` operation without a deprecated entry point;
+the existing `owner` API remains deprecated and its behavior is unchanged.
+The library-only backport adapts the availability annotation to `(2, 2, 4)`
+and documents availability in this Metacraft-patched stock package. It does
+not claim that an upstream Nim 2.2.4 release provides the API. No VM or tracing
+changes are included.
+
+Run `nix build .#checks.x86_64-linux.nim-symbol-owner` (or the host system).
+The required check compiles the unchanged owning typed-symbol assertions using
+both real wrapper and unwrapped compilers, under C and JS with deprecated
+warnings treated as errors. It checks module, procedure, field, type, local,
+capture, nested overload, generic and ownerless-symbol behavior. Exact
+non-symbol and legacy-deprecation refusals remain required. A reproducible
+compiler with only the first two backports must refuse the absent API on both
+backends. An isolated library mutation returning the input symbol must fail
+the unchanged ownership assertion on both backends. Its output retains all
+compiler logs plus source, patch, library and binary provenance.
+
 `python3 tests/check_ci_package_inventory.py` evaluates the actual Linux and
 Darwin package/check catalogs and rejects missing package checks, including its
 real removed-checks negative control. All exported package builds, including
-the existing langserver build, remain in `checks` alongside the ownership gate.
+the existing langserver build, remain in `checks` alongside both required gates.
 
 On Linux, `tests/check_ownership_memory.sh` additionally requires real Valgrind.
 Set `WRAPPED_NIM` to the combined package compiler, `FIRST_FIX_NIM` to its

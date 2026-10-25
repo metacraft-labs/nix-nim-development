@@ -67,6 +67,10 @@
               inherit (overlayedPkgs.metacraft-labs) nim nim-unwrapped;
               baseline = pkgs.nim2;
             };
+            nim-symbol-owner = overlayedPkgs.callPackage ./packages/nim/check-symbol-owner.nix {
+              inherit (overlayedPkgs.metacraft-labs) nim nim-unwrapped;
+              baseline = pkgs.nim2;
+            };
           };
 
           devShells.default = import ./shell.nix { pkgs = overlayedPkgs; };

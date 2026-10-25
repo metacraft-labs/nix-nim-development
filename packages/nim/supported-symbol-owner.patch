@@ -1,0 +1,23 @@
+diff --git a/lib/core/macros.nim b/lib/core/macros.nim
+index 50323c8ef..b37308d69 100644
+--- a/lib/core/macros.nim
++++ b/lib/core/macros.nim
+@@ -279,6 +279,18 @@ when (NimMajor, NimMinor, NimPatch) >= (1, 3, 5) or defined(nimSymImplTransform)
+     ## note that code transformations are implementation dependent and subject to change.
+     ## See an example in `tests/macros/tmacros_various.nim`.
+ 
++proc getOwner*(sym: NimNode): NimNode {.magic: "SymOwner", noSideEffect, since: (2, 2, 4).}
++  ## Returns the compiler owner of a typed `nnkSym` node. For example, a
++  ## procedure-local variable is owned by its procedure and an object field
++  ## by its type. Generic instantiations follow the originating generic's
++  ## owner. This relation is not necessarily a source-level lexical scope.
++  ##
++  ## The result preserves symbol identity, including distinct overloads.
++  ## Ownerless symbols produce `nnkNilLit`; non-symbol arguments are errors.
++  ## Module symbols can own themselves, so stop ancestry traversal at
++  ## `nskModule` rather than assuming every chain ends in `nnkNilLit`.
++  ## This accessor is available in the Metacraft-patched stock Nim 2.2.4.
++
+ proc owner*(sym: NimNode): NimNode {.magic: "SymOwner", noSideEffect, deprecated.}
+   ## Accepts a node of kind `nnkSym` and returns its owner's symbol.
+   ## The meaning of 'owner' depends on `sym`'s `NimSymKind` and declaration
