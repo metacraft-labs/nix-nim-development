@@ -4,7 +4,14 @@ set -u
 source_dir=$(cd -- "$(dirname -- "$0")" && pwd)
 # Nix dev shells may delete their TMPDIR on exit. Keep the printed receipts
 # outside that shell-owned parent unless the caller explicitly chooses one.
-evidence=$(mktemp -d "${NIM_DESTRUCTOR_EVIDENCE_ROOT:-/tmp}/nim-phantom-destructor.XXXXXXXX")
+if [[ -n ${NIM_DESTRUCTOR_EVIDENCE_DIR:-} ]]; then
+  # Package checks own an exclusive, deterministic destination. Refuse reuse so
+  # a stale compilation can never satisfy a later invocation's assertions.
+  evidence=$NIM_DESTRUCTOR_EVIDENCE_DIR
+  [[ $evidence == /* ]] && mkdir -- "$evidence" || exit 2
+else
+  evidence=$(mktemp -d "${NIM_DESTRUCTOR_EVIDENCE_ROOT:-/tmp}/nim-phantom-destructor.XXXXXXXX") || exit 2
+fi
 printf 'Evidence: %s\n' "$evidence"
 compiler=${NIM:-nim}
 "$compiler" --version || exit 2

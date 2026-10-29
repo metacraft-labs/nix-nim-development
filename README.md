@@ -76,7 +76,27 @@ compiler logs plus source, patch, library and binary provenance.
 `python3 tests/check_ci_package_inventory.py` evaluates the actual Linux and
 Darwin package/check catalogs and rejects missing package checks, including its
 real removed-checks negative control. All exported package builds, including
-the existing langserver build, remain in `checks` alongside both required gates.
+the existing langserver build, remain in `checks` alongside the required gates.
+
+## Reproducible retained check evidence
+
+The compiler behavior checks retain deterministic, exclusive evidence directories
+for each invocation, without changing standalone harnesses' random-directory
+default. Archive finalization runs only after every behavioral assertion and
+negative control has passed. It validates Nim cache timestamps against the actual
+retained output files, then archives those mtimes and nonempty cache timestamp
+fields at the Nix store epoch (Unix second 1). Empty timestamp fields and every
+other source, cache, compiler, command and log byte remain unchanged. The retained
+`artifact-retention.txt` receipts describe this archive policy and its census;
+canonical timestamps are not wall-clock execution provenance.
+
+`nim-artifact-retention` exercises metadata corruption and containment refusals,
+byte preservation, and real C runtime / JS compiler output with the packaged
+compiler. Run `python3 tests/check_artifact_reproducibility.py --output /tmp/nim-check-comparison`
+to build and force-rebuild all three behavior checks on x86_64-linux, retaining
+both logs and requiring Nix's complete output comparison. Use `--system` for a
+different local platform or `--check` to select a focused check. A successful
+ordinary build alone does not establish byte reproducibility.
 
 On Linux, `tests/check_ownership_memory.sh` additionally requires real Valgrind.
 Set `WRAPPED_NIM` to the combined package compiler, `FIRST_FIX_NIM` to its

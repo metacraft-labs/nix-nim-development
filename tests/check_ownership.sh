@@ -5,13 +5,15 @@ set -euo pipefail
 sources=$(cd -- "$(dirname -- "$0")" && pwd)
 : "${WRAPPED_NIM:?}" "${UNWRAPPED_NIM:?}" "${STOCK_NIM:?}" "${FIRST_FIX_NIM:?}" "${OWNERSHIP_OUTPUT:?}"
 mkdir -p "$OWNERSHIP_OUTPUT"
-output=$OWNERSHIP_OUTPUT
+output=$(cd -- "$OWNERSHIP_OUTPUT" && pwd)
 mkdir -p "$output/evidence"
 export NIM_DESTRUCTOR_EVIDENCE_ROOT="$output/evidence"
 export NIM_CONSTRUCTOR_EVIDENCE_ROOT="$output/evidence"
 run_harness() {
   local compiler=$1 fixture=$2 expected=$3 label=$4 rc=0
-  NIM="$compiler" bash "$sources/$fixture/reproduce.sh" > "$output/$label.log" 2>&1 || rc=$?
+  NIM="$compiler" NIM_DESTRUCTOR_EVIDENCE_DIR="$output/evidence/$label" \
+    NIM_CONSTRUCTOR_EVIDENCE_DIR="$output/evidence/$label" \
+    bash "$sources/$fixture/reproduce.sh" > "$output/$label.log" 2>&1 || rc=$?
   cat "$output/$label.log"
   [[ $rc == "$expected" ]] || { echo "$label: expected $expected, got $rc" >&2; exit 1; }
 }

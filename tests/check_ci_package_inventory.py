@@ -17,7 +17,9 @@ def validate(data):
         checks = data[system]["checks"]
         if (not packages or not checks
                 or any(checks.get(name) != drv for name, drv in packages.items())
-                or set(checks) != set(packages) | {"nim-ownership", "nim-symbol-owner"}):
+                or set(checks) != set(packages) | {
+                    "nim-ownership", "nim-symbol-owner", "nim-artifact-retention",
+                }):
             raise ValueError("Missing or different complete CI derivations for " + system)
         if any(not value.endswith(".drv") for value in checks.values()):
             raise ValueError("Catalog contains a non-derivation identity")

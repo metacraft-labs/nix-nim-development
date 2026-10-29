@@ -3,7 +3,14 @@
 # a failed explicit-transfer control are inconclusive, never reproductions.
 set -u
 source_dir=$(cd -- "$(dirname -- "$0")" && pwd)
-evidence=$(mktemp -d "${NIM_CONSTRUCTOR_EVIDENCE_ROOT:-/tmp}/nim-constructor-resource.XXXXXXXX")
+if [[ -n ${NIM_CONSTRUCTOR_EVIDENCE_DIR:-} ]]; then
+  # Each packaged compiler/case has a fresh destination. Standalone reductions
+  # keep their random-directory default without sharing a compiler cache.
+  evidence=$NIM_CONSTRUCTOR_EVIDENCE_DIR
+  [[ $evidence == /* ]] && mkdir -- "$evidence" || exit 2
+else
+  evidence=$(mktemp -d "${NIM_CONSTRUCTOR_EVIDENCE_ROOT:-/tmp}/nim-constructor-resource.XXXXXXXX") || exit 2
+fi
 printf 'Evidence: %s\n' "$evidence"
 compiler=${NIM:-nim}
 "$compiler" --version > "$evidence/compiler.txt" 2>&1 || exit 2
