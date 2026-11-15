@@ -90,12 +90,25 @@ other source, cache, compiler, command and log byte remain unchanged. The retain
 `artifact-retention.txt` receipts describe this archive policy and its census;
 canonical timestamps are not wall-clock execution provenance.
 
+The checks also run from fixed paths and build every program from sources at
+fixed paths. Nim records the working directory in every cache record, derives
+C type names from each module's absolute source path, and embeds that path in
+the executable. The Darwin builder has no chroot: its build directory is
+randomised, and a forced rebuild writes to a scratch output path that Nix
+rewrites only as literal bytes afterwards. So every check runs from its
+read-only tests source path, and a derived fixture that is built into a
+program, such as the wrong-hook mutant, is a store path of its own instead of
+a copy under the output. The symbol-owner library mutant stays under the
+output: each compilation with it is refused before code generation, so only
+its logs name it.
+
 `nim-artifact-retention` exercises metadata corruption and containment refusals,
 byte preservation, and real C runtime / JS compiler output with the packaged
 compiler. Run `python3 tests/check_artifact_reproducibility.py --output /tmp/nim-check-comparison`
 to build and force-rebuild all three behavior checks on x86_64-linux, retaining
 both logs and requiring Nix's complete output comparison. Use `--system` for a
-different local platform or `--check` to select a focused check. A successful
+different local platform, such as `aarch64-darwin`, or `--check` to select a
+focused check. A successful
 ordinary build alone does not establish byte reproducibility.
 
 On Linux, `tests/check_ownership_memory.sh` additionally requires real Valgrind.

@@ -83,10 +83,19 @@ for backend in c cpp; do
 done
 # Deliberately dispatch string/int hooks backwards in a copied fixture. The
 # same owning program must compile, then refuse the wrong nominal marker.
-cp -R "$sources/phantom-hooks" "$output/wrong-hook-source"
-chmod -R u+w "$output/wrong-hook-source"
-sed -i 's/when T is string:/when T is int:/g' "$output/wrong-hook-source/phantomhooks/owner.nim"
-run_case wrong-hook "$WRAPPED_NIM" c arc off "$output/wrong-hook-source/tphantomtypehooks.nim"
+# Nim derives C type names from each module's absolute source path, and the
+# binary embeds that path, so retained evidence is reproducible only when every
+# compiled source sits at a fixed path. The package check therefore passes the
+# mutant as its own store path in WRONG_HOOK_SOURCE; a copy under the output
+# would be compiled from a different path whenever Nix redirects the output
+# (a Darwin --rebuild/--check builds into a scratch path and rewrites only its
+# literal spelling afterwards, not hashes or signatures derived from it).
+wrong_hook_source=${WRONG_HOOK_SOURCE:-}
+if [[ -z $wrong_hook_source ]]; then
+  wrong_hook_source="$output/wrong-hook-source"
+  bash "$sources/make_wrong_hook_fixture.sh" "$sources/phantom-hooks" "$wrong_hook_source"
+fi
+run_case wrong-hook "$WRAPPED_NIM" c arc off "$wrong_hook_source/tphantomtypehooks.nim"
 if "$output/wrong-hook" > "$output/wrong-hook.run.log" 2>&1; then
   echo 'Wrong nominal hook was accepted' >&2; exit 1
 fi

@@ -17,6 +17,14 @@ import unittest
 from normalize_check_artifacts import EPOCH, POLICY, TIMESTAMP, finalize
 
 
+# Compile the control program from its fixed location beside this file, never
+# from a copy in the output: Nim embeds the source path in the executable, and
+# on Darwin a Nix --rebuild/--check builds into a scratch output path that Nix
+# rewrites only as literal bytes afterwards, so a code signature or Mach-O UUID
+# computed over the original spelling would differ from the first build's.
+SUBJECT = Path(__file__).resolve().parent / "artifact-retention" / "subject.nim"
+
+
 class MetadataTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
@@ -177,8 +185,9 @@ def contents(root):
 def compile_outputs(nim, output, backends):
     """Retain sources, commands and logs for actual packaged compiler runs."""
     output.mkdir(parents=True, exist_ok=False)
-    source = output / "subject.nim"
-    source.write_text('echo "retained compiler evidence"\n')
+    # Retain an exact copy of the compiled source; compile the fixed original.
+    (output / "subject.nim").write_bytes(SUBJECT.read_bytes())
+    source = SUBJECT
     commands = []
     for backend in backends:
         command = [

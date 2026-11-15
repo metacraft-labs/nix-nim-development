@@ -70,9 +70,24 @@
                   _: check:
                   check.overrideAttrs (old: {
                     nativeBuildInputs = old.nativeBuildInputs ++ [ pkgs.python3 ];
+                    # Run every check from a fixed working directory. Nim records
+                    # it as "currentDir" in each retained cache record, and the
+                    # builder's own directory is not fixed: the Linux sandbox
+                    # always uses /build, but Darwin (which has no chroot) builds
+                    # in a randomised /nix/var/nix/builds/nix-<pid>-<rand>. The
+                    # tests source path is content-addressed, so it is the same
+                    # on every build and platform; it is also read-only, so a
+                    # stray relative write fails instead of landing unnoticed in
+                    # the retained evidence. (Compiled sources must likewise sit
+                    # at fixed paths, never under $out: see check_ownership.sh.)
+                    #
                     # Archive only after every real assertion has passed. Keep this
                     # policy shared by all retained compiler-evidence checks.
-                    buildCommand = old.buildCommand + ''
+                    buildCommand = ''
+                      cd ${./tests}
+                    ''
+                    + old.buildCommand
+                    + ''
                       python3 ${./tests}/normalize_check_artifacts.py "$out"
                     '';
                   })
