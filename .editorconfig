@@ -16,3 +16,8 @@ indent_size = unset
 [{Makefile,*.go,.gitmodules}]
 indent_style = tab
 indent_size = 4
+
+# Unified patches preserve context-prefix spaces and source indentation.
+[*.patch]
+indent_size = unset
+trim_trailing_whitespace = false

@@ -29,7 +29,19 @@ jobs:
     uses: metacraft-labs/devops-modules/.github/workflows/reusable-flake-checks-ci-matrix.yml@dev
     secrets:
       NIX_GITHUB_TOKEN: ${{ secrets.NIX_GITHUB_TOKEN || secrets.GH_READ_METACRAFT_PRIVATE_REPOS || github.token }}
+      # The private Attic cache (vars.SUBSTITUTERS). Without a credential the
+      # runners drop it after a 401 preflight, and nothing this repo builds is
+      # ever uploaded, so each output lives only in the store of the runner
+      # that built it and is rebuilt cold on any other runner. The reusable
+      # workflow reads with ATTIC_PULL_TOKEN, falls back to ATTIC_TOKEN, and
+      # uploads only with ATTIC_TOKEN.
+      ATTIC_PULL_TOKEN: ${{ secrets.ATTIC_PULL_TOKEN }}
+      ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
     with:
+      # Upload successful build outputs only from a push to a mainline, i.e.
+      # code that already landed. Pull-request and merge-queue runs build code
+      # that has not landed, and must not write to a cache other runs trust.
+      push-check-caches: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/stable') && 'true' || 'false' }}
       runners: | # json
         {
           "x86_64-linux": [
